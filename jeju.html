@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>2026 제주권 모바일 일정표 (A·B·C·D팀)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f4f7fb;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .timeline-line::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      bottom: 16px;
+      left: 19px;
+      width: 2px;
+      background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 50%, #e2e8f0 100%);
+      z-index: 0;
+    }
+    .card-transition {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .rain-pulse {
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.25); }
+      50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24">
+
+  <!-- Top Hero Banner -->
+  <header class="relative overflow-hidden bg-gradient-to-br from-sky-700 via-teal-600 to-emerald-600 text-white shadow-md">
+    <!-- Decorative Jeju SVG Background -->
+    <svg class="absolute right-0 bottom-0 w-64 h-36 opacity-15 pointer-events-none" viewBox="0 0 300 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 160L95 55L135 90L195 30L285 160H20Z" fill="white"/>
+      <circle cx="240" cy="45" r="22" fill="#FDE047"/>
+      <path d="M0 145C60 130 120 155 180 140C240 125 270 145 300 135V160H0V145Z" fill="#38BDF8"/>
+    </svg>
+
+    <div class="max-w-2xl mx-auto px-4 pt-5 pb-4 relative z-10">
+      <div class="flex items-center justify-between gap-2 mb-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-sm border border-white/25">
+          <span>✈️</span>
+          <span>2026.10.22.(목) ~ 10.24.(토) · 2박 3일</span>
+        </span>
+        <button id="btnShareSchedule" type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 active:scale-95 transition border border-white/25" title="현재 선택한 팀 일정 요약 복사">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span>일정 복사</span>
+        </button>
+      </div>
+
+      <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight leading-snug">
+        제주권 여행 모바일 일정표
+      </h1>
+      <p class="text-xs sm:text-sm text-sky-100 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span>🏨 숙소: 켄싱턴리조트 서귀포점</span>
+        <span>📍 집결: 김포공항 1층 앤젤리너스 앞</span>
+      </p>
+
+      <!-- Quick Class Finder Bar -->
+      <div class="mt-3.5 bg-black/20 backdrop-blur-md rounded-xl p-2.5 border border-white/15">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-semibold text-sky-100 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+            내 학급(반)으로 팀 바로 찾기
+          </span>
+          <span id="selectedClassLabel" class="text-[11px] font-bold text-amber-300">3·7·9반 → A팀</span>
+        </div>
+        <div id="classButtonsContainer" class="grid grid-cols-5 sm:grid-cols-10 gap-1">
+          <!-- Rendered by JS: 1반 ~ 10반 -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Control Bar: Team Selector + Rainy Mode Toggle -->
+  <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-2xl mx-auto px-3 py-2.5">
+      <!-- 4 Teams Tabs -->
+      <div id="teamTabsContainer" class="grid grid-cols-4 gap-1.5">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Sub-controls: Day selector + Rainy toggle -->
+      <div id="timelineSubControls" class="mt-2.5 flex items-center justify-between gap-2">
+        <div id="dayTabsContainer" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+          <!-- Rendered by JS: 제1일, 제2일, 제3일, 전체 -->
+        </div>
+
+        <button id="btnRainyToggle" type="button" class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95">
+          <span id="rainyToggleIcon">☀️</span>
+          <span id="rainyToggleText">맑음 기준</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="max-w-2xl mx-auto px-3 sm:px-4 pt-3">
+
+    <!-- VIEW 1: TIMELINE VIEW (Default) -->
+    <section id="viewTimeline" class="space-y-3">
+      <!-- Team Summary Card -->
+      <div id="teamSummaryCard" class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/80">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Category & Search Filter Bar -->
+      <div class="bg-white rounded-xl p-2.5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+        <div id="categoryFilterContainer" class="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <!-- Rendered by JS -->
+        </div>
+        <div class="relative flex-1 min-w-[160px]">
+          <input id="searchInput" type="text" placeholder="장소, 식사 메뉴, 체험 검색..." class="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-100 rounded-lg border border-transparent focus:border-teal-500 focus:bg-white focus:outline-none transition" />
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <button id="btnClearSearch" type="button" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold">✕</button>
+        </div>
+      </div>
+
+      <!-- Rainy Mode Active Notice Banner -->
+      <div id="rainyNoticeBanner" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 flex items-start justify-between gap-2 rain-pulse">
+        <div class="flex items-start gap-2">
+          <span class="text-base leading-none mt-0.5">☔</span>
+          <div>
+            <p class="font-bold text-blue-900">우천시 대체 일정 모드가 켜져 있습니다</p>
+            <p class="text-blue-700 mt-0.5">야외 관광지 7곳이 우천시 실내 대체 코스로 자동 변환되어 표시됩니다.</p>
+          </div>
+        </div>
+        <button id="btnTurnOffRainy" type="button" class="shrink-0 px-2 py-1 bg-blue-600 text-white rounded-lg font-semibold text-[11px] hover:bg-blue-700">기본 보기</button>
+      </div>
+
+      <!-- Timeline List Container -->
+      <div id="timelineContainer" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: COMPARE TEAMS VIEW -->
+    <section id="viewCompare" class="hidden space-y-3">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">4개 팀(A·B·C·D) 한눈에 비교</h2>
+            <p class="text-xs text-slate-500 mt-0.5">집결·항공 시간 및 일자별 주요 방문 코스를 팀별로 비교합니다.</p>
+          </div>
+          <div id="compareDaySelector" class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div id="compareContentContainer" class="space-y-3">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: RAINY SCHEDULE TABLE VIEW -->
+    <section id="viewRainy" class="hidden space-y-3">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-700 mb-1">☔ 우천시 비상 일정</span>
+            <h2 class="text-base font-extrabold text-slate-900">우천시 변경 일정표 (7개 주요 코스)</h2>
+            <p class="text-xs text-slate-500 mt-0.5">현지 기상 악화 시 아래와 같이 실내 관람 및 체험 코스로 대체 운영됩니다.</p>
+          </div>
+        </div>
+
+        <!-- Rainy Schedule Cards for Mobile & Table -->
+        <div id="rainyCardsContainer" class="space-y-2.5">
+          <!-- Rendered by JS -->
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-100">
+          * 산양큰엉곶(순번 3) 및 제주제트(순번 4)는 우천 시 <strong>박물관은살아있다 / 여고괴담</strong>으로 대체됩니다.<br>
+          * 상기 일정은 현지 사정에 의하여 변경될 수 있습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- VIEW 4: INFO & MEALS / FLIGHT SUMMARY VIEW -->
+    <section id="viewInfo" class="hidden space-y-3">
+      <!-- Flight & Gathering Card -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+          <span>✈️</span>
+          <span>항공 및 집결·숙소 핵심 안내</span>
+        </h2>
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-sky-50 border border-sky-100">
+            <div class="font-bold text-sky-900 mb-1">📍 집결 장소 및 시간</div>
+            <p class="text-sky-800 font-semibold">김포공항 1층 앤젤리너스 앞</p>
+            <ul class="mt-1.5 space-y-0.5 text-sky-700">
+              <li>• <strong>A팀 (3, 7, 9반)</strong>: 05:00 집결</li>
+              <li>• <strong>B팀 (1, 5반)</strong>: 05:00 집결</li>
+              <li>• <strong>C팀 (2, 4, 10반)</strong>: 05:00 집결</li>
+              <li>• <strong>D팀 (6, 8반)</strong>: 05:00 집결</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+            <div class="font-bold text-emerald-900 mb-1">🏨 숙소 및 인원 총괄</div>
+            <p class="text-emerald-800 font-semibold">켄싱턴리조트 서귀포점 (전 일정 동일)</p>
+            <ul class="mt-1.5 space-y-0.5 text-emerald-700">
+              <li>• <strong>전체 인원</strong>: 학생 281명, 교사 23명 (총 304명)</li>
+              <li>• <strong>항공편</strong>: 대한항공 (김포↔제주)</li>
+              <li>• <strong>대표 스케줄 표기</strong>: 김포출발 07:05/07:10/07:20 · 제주출발 18:15/19:40/19:55</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Team Flight Table -->
+        <div class="mt-3 overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 border-y border-slate-200">
+                <th class="py-2 px-2.5 font-bold">구분</th>
+                <th class="py-2 px-2.5 font-bold">학급 (인원)</th>
+                <th class="py-2 px-2.5 font-bold">제1일 김포출발</th>
+                <th class="py-2 px-2.5 font-bold">제3일 제주출발 (해산)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="py-2 px-2.5 font-bold text-teal-700">A팀</td>
+                <td class="py-2 px-2.5">3·7·9반 (학생 82, 교사 8)</td>
+                <td class="py-2 px-2.5 font-medium">07:05 - 08:20 (05:00 집결)</td>
+                <td class="py-2 px-2.5 font-medium">18:15 - 19:30 (20:00 해산)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2.5 font-bold text-blue-700">B팀</td>
+                <td class="py-2 px-2.5">1·5반 (학생 57, 교사 4)</td>
+                <td class="py-2 px-2.5 font-medium">07:10 - 08:25 (05:00 집결)</td>
+                <td class="py-2 px-2.5 font-medium">19:35 - 20:50 (21:30 해산)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2.5 font-bold text-indigo-700">C팀</td>
+                <td class="py-2 px-2.5">2·4·10반 (학생 92, 교사 6)</td>
+                <td class="py-2 px-2.5 font-medium">07:25 - 08:40 (05:00 집결)</td>
+                <td class="py-2 px-2.5 font-medium">19:35 - 20:50 (21:30 해산)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-2.5 font-bold text-purple-700">D팀</td>
+                <td class="py-2 px-2.5">6·8반 (학생 50, 교사 5)</td>
+                <td class="py-2 px-2.5 font-medium">07:40 - 08:55 (05:00 집결)</td>
+                <td class="py-2 px-2.5 font-medium">19:35 - 20:50 (21:30 해산)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3-Day Meal Plan Overview -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+          <span>🍽️</span>
+          <span>일자별 식사 메뉴 한눈에 보기</span>
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">중식 식당은 팀별 동선(서부권/동부권)에 따라 1일차·2일차 순서가 교차됩니다.</p>
+
+        <div id="mealSummaryContainer" class="mt-3 space-y-2.5">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-6 mb-4 text-center text-[11px] text-slate-400">
+      * 상기 일정은 현지 사정에 의하여 변경될 수 있습니다.
+    </footer>
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg">
+    <div class="max-w-2xl mx-auto grid grid-cols-4 px-2 py-1.5">
+      <button type="button" data-nav="timeline" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-teal-600 font-bold text-[11px] transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>팀별 일정표</span>
+      </button>
+      <button type="button" data-nav="compare" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-medium text-[11px] transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        <span>4개팀 비교</span>
+      </button>
+      <button type="button" data-nav="rainy" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-medium text-[11px] transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+        <span>우천시 일정</span>
+      </button>
+      <button type="button" data-nav="info" class="nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 font-medium text-[11px] transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>항공·식단안내</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl flex items-center gap-2">
+    <span id="toastIcon">✅</span>
+    <span id="toastMessage">복사되었습니다.</span>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. COMPLETE DATASET FROM 5-PAGE PDF
+    // ==========================================
+    const RAINY_ALTERNATIVES = [
+      { no: 1, before: "협재해수욕장", after: "제주현대미술관", matchKey: "협재해수욕장", note: "서부 해변 산책 → 실내 현대미술 전시 관람" },
+      { no: 2, before: "올레12코스 [엉알해변-자구내포구]", after: "항공우주박물관", matchKey: "올레12코스", note: "해안 올레길 탐방 → 실내 항공·우주 테마 관람" },
+      { no: 3, before: "산양큰엉곶", after: "박물관은살아있다 / 여고괴담", matchKey: "산양큰엉곶", note: "숲길 탐방 → 실내 착시미술·테마 체험" },
+      { no: 4, before: "제주제트 [제트보트체험]", after: "박물관은살아있다 / 여고괴담", matchKey: "제주제트", note: "해상 제트보트 → 실내 착시미술·테마 체험" },
+      { no: 5, before: "산굼부리", after: "아리랑공연장", matchKey: "산굼부리", note: "억새 분화구 탐방 → 실내 공연 관람" },
+      { no: 6, before: "동화마을", after: "4.3평화공원", matchKey: "동화마을", note: "야외 테마마을 → 제주 4·3평화기념관 관람" },
+      { no: 7, before: "천지연폭포", after: "서귀포 감귤박물관", matchKey: "천지연폭포", note: "폭포 관람 → 서귀포 감귤박물관 실내 관람" }
+    ];
+
+    const CLASS_TO_TEAM = {
+      1: "B", 2: "C", 3: "A", 4: "C", 5: "B",
+      6: "D", 7: "A", 8: "D", 9: "A", 10: "C"
+    };
+
+    const TEAMS_DATA = {
+      A: {
+        id: "A",
+        name: "A팀",
+        classes: [3, 7, 9],
+        classText: "3반, 7반, 9반",
+        students: 82,
+        teachers: 8,
+        total: 90,
+        region: "제주권",
+        period: "2026.10.22.(목) - 10.24.(토)",
+        hotel: "켄싱턴리조트 서귀포점",
+        meetingPlace: "김포공항 1층 앤젤리너스 앞 집결",
+        meetingTime: "05:00 집결",
+        flightOut: "대한항공 07:05 - 08:20 (김포 → 제주)",
+        flightBack: "대한항공 18:15 - 19:30 (제주 → 김포)",
+        dismissTime: "20:00 예정",
+        flightHeaderNote: "김포출발 : 대한항공 0705/0710/0720 | 제주출발 : 대한항공 1815/1940/1955",
+        days: {
+          1: {
+            dayTitle: "제1일",
+            dateStr: "10.22.(목)",
+            mealsSummary: "중: 현지식 (흑돼지쌈밥정식) · 석: 현지식 (애슐리퀸즈 디너뷔페)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "05:00 집결", region: "서울", transport: "개별이동", title: "공항 집결 및 인원점검 후 탑승수속", detail: "김포공항 1층 앤젤리너스 앞 집결", category: "flight" },
+              { time: "07:05 - 08:20", region: "서울→제주", transport: "전용항공", title: "김포공항 출발 – 제주공항 도착 / 차량으로 이동", detail: "대한항공 탑승 및 제주 도착 후 전용차량 탑승", category: "flight" },
+              { time: "10:00 - 11:00", region: "제주권", transport: "전용차량", title: "◆협재해수욕장", detail: "제주 서부 에메랄드빛 해변 탐방", category: "spot", rainyKey: "협재해수욕장" },
+              { time: "11:30 - 12:30", region: "제주권", transport: "전용차량", title: "◆올레12코스 [엉알해변-자구내포구]", detail: "수월봉 해안절벽 올레길 걷기", category: "spot", rainyKey: "올레12코스" },
+              { time: "12:40 - 13:40", region: "제주권", transport: "전용차량", title: "중식 후 (전원일기_흑돼지쌈밥정식)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "14:00 - 15:30", region: "제주권", transport: "전용차량", title: "◆산양큰엉곶", detail: "곶자왈 숲길 및 포토존 산책", category: "spot", rainyKey: "산양큰엉곶" },
+              { time: "16:00 - 17:00", region: "제주권", transport: "전용차량", title: "◆제주제트 [제트보트체험]", detail: "주상절리 해상 제트보트 탑승 체험", category: "spot", rainyKey: "제주제트" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "숙소 도착 및 안전교육 후 객실배정", detail: "켄싱턴리조트 서귀포점 체크인", category: "hotel" },
+              { time: "17:30 이후", region: "제주권", transport: "전용차량", title: "석식 후 (애슐리퀸즈_디너뷔페)", detail: "석식 제공 (현지식 디너뷔페)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          2: {
+            dayTitle: "제2일",
+            dateStr: "10.23.(금)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (흑돼지주물럭+보말미역국) · 석: 현지식 (제주산삼겹살+샐러드바)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "07:00 - 09:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "켄싱턴리조트 서귀포점 조식", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:00 - 11:00", region: "제주권", transport: "전용차량", title: "◆산굼부리", detail: "천연기념물 분화구 및 가을 억새 관람", category: "spot", rainyKey: "산굼부리" },
+              { time: "11:10 - 12:10", region: "제주권", transport: "전용차량", title: "◆동화마을", detail: "제주 테마 정원 및 포토 스팟 관람", category: "spot", rainyKey: "동화마을" },
+              { time: "12:20 - 13:20", region: "제주권", transport: "전용차량", title: "중식 후 (산내들내_흑돼지주물럭+보말미역국)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "13:50 - 14:50", region: "제주권", transport: "전용차량", title: "◆레일바이크", detail: "제주 자연 풍경 레일바이크 체험", category: "spot" },
+              { time: "15:30 - 18:00", region: "제주권", transport: "전용차량", title: "◆윈드1947테마파크", detail: "서킷 카트 등 테마파크 체험", category: "spot" },
+              { time: "18:00 - 19:30", region: "제주권", transport: "전용차량", title: "석식 후 (무송_제주산삼겹살+샐러드바)", detail: "석식 제공 (현지식)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "20:00 - 22:00", region: "제주권", transport: "전용차량", title: "숙소도착 후 ◆레크레이션", detail: "팀별/전체 야간 레크리에이션 활동", category: "spot" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          3: {
+            dayTitle: "제3일",
+            dateStr: "10.24.(토)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (소불고기전골)",
+            hotel: "귀가일 (김포공항 해산)",
+            items: [
+              { time: "07:00 - 10:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "조식 후 짐 정리 및 퇴실 준비", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:20 - 11:20", region: "제주권", transport: "전용차량", title: "◆천지연폭포", detail: "서귀포 천지연 계곡 및 폭포 관람", category: "spot", rainyKey: "천지연폭포" },
+              { time: "11:50 - 12:50", region: "제주권", transport: "전용차량", title: "◆런닝맨체험", detail: "실내 액티비티 미션 체험", category: "spot" },
+              { time: "13:30 - 14:30", region: "제주권", transport: "전용차량", title: "중식 후 (제주늘봄_소불고기전골)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "15:00 - 16:00", region: "제주권", transport: "전용차량", title: "◆자연인_족욕체험&카페체험", detail: "여행 피로 회복 족욕 및 카페 휴식", category: "spot" },
+              { time: "16:00 - 16:30", region: "제주권", transport: "전용차량", title: "제주공항으로 이동", detail: "탑승수속 준비", category: "flight" },
+              { time: "18:15 - 19:30", region: "제주→서울", transport: "전용항공", title: "제주공항 출발 – 김포공항 도착", detail: "대한항공 탑승", category: "flight" },
+              { time: "20:00 예정", region: "서울", transport: "개별해산", title: "김포공항 도착 및 개별해산", detail: "안전하게 귀가", category: "flight" }
+            ]
+          }
+        }
+      },
+
+      B: {
+        id: "B",
+        name: "B팀",
+        classes: [1, 5],
+        classText: "1반, 5반",
+        students: 57,
+        teachers: 4,
+        total: 61,
+        region: "제주권",
+        period: "2026.10.22.(목) - 10.24.(토)",
+        hotel: "켄싱턴리조트 서귀포점",
+        meetingPlace: "김포공항 1층 앤젤리너스 앞 집결",
+        meetingTime: "05:00 집결",
+        flightOut: "대한항공 07:10 - 08:25 (김포 → 제주)",
+        flightBack: "대한항공 19:35 - 20:50 (제주 → 김포)",
+        dismissTime: "21:30 예정",
+        flightHeaderNote: "김포출발 : 대한항공 0705/0710/0720 | 제주출발 : 대한항공 1815/1940/1955",
+        days: {
+          1: {
+            dayTitle: "제1일",
+            dateStr: "10.22.(목)",
+            mealsSummary: "중: 현지식 (흑돼지쌈밥정식) · 석: 현지식 (애슐리퀸즈 디너뷔페)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "05:00 집결", region: "서울", transport: "개별이동", title: "공항 집결 및 인원점검 후 탑승수속", detail: "김포공항 1층 앤젤리너스 앞 집결", category: "flight" },
+              { time: "07:10 - 08:25", region: "서울→제주", transport: "전용항공", title: "김포공항 출발 – 제주공항 도착 / 차량으로 이동", detail: "대한항공 탑승 및 제주 도착 후 전용차량 탑승", category: "flight" },
+              { time: "10:00 - 11:00", region: "제주권", transport: "전용차량", title: "◆올레12코스 [엉알해변-자구내포구]", detail: "수월봉 해안절벽 올레길 걷기", category: "spot", rainyKey: "올레12코스" },
+              { time: "11:30 - 12:30", region: "제주권", transport: "전용차량", title: "◆협재해수욕장", detail: "제주 서부 에메랄드빛 해변 탐방", category: "spot", rainyKey: "협재해수욕장" },
+              { time: "12:50 - 13:50", region: "제주권", transport: "전용차량", title: "중식 후 (전원일기_흑돼지쌈밥정식)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "14:00 - 15:30", region: "제주권", transport: "전용차량", title: "◆산양큰엉곶", detail: "곶자왈 숲길 및 포토존 산책", category: "spot", rainyKey: "산양큰엉곶" },
+              { time: "16:00 - 17:00", region: "제주권", transport: "전용차량", title: "◆런닝맨체험", detail: "실내 액티비티 미션 체험", category: "spot" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "숙소 도착 및 안전교육 후 객실배정", detail: "켄싱턴리조트 서귀포점 체크인", category: "hotel" },
+              { time: "17:30 이후", region: "제주권", transport: "전용차량", title: "석식 후 (애슐리퀸즈_디너뷔페)", detail: "석식 제공 (현지식 디너뷔페)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          2: {
+            dayTitle: "제2일",
+            dateStr: "10.23.(금)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (흑돼지주물럭+보말미역국) · 석: 현지식 (제주산삼겹살+샐러드바)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "07:00 - 09:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "켄싱턴리조트 서귀포점 조식", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:30 - 11:30", region: "제주권", transport: "전용차량", title: "◆레일바이크", detail: "제주 자연 풍경 레일바이크 체험", category: "spot" },
+              { time: "11:40 - 12:30", region: "제주권", transport: "전용차량", title: "중식 후 (산내들내_흑돼지주물럭+보말미역국)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "12:40 - 13:40", region: "제주권", transport: "전용차량", title: "◆동화마을", detail: "제주 테마 정원 및 포토 스팟 관람", category: "spot", rainyKey: "동화마을" },
+              { time: "14:00 - 15:00", region: "제주권", transport: "전용차량", title: "◆산굼부리", detail: "천연기념물 분화구 및 가을 억새 관람", category: "spot", rainyKey: "산굼부리" },
+              { time: "15:30 - 18:00", region: "제주권", transport: "전용차량", title: "◆윈드1947테마파크", detail: "서킷 카트 등 테마파크 체험", category: "spot" },
+              { time: "18:00 - 19:00", region: "제주권", transport: "전용차량", title: "석식 후 (무송_제주산삼겹살+샐러드바)", detail: "석식 제공 (현지식)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "19:30 - 21:30", region: "제주권", transport: "전용차량", title: "숙소도착 후 ◆레크레이션", detail: "팀별/전체 야간 레크리에이션 활동", category: "spot" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          3: {
+            dayTitle: "제3일",
+            dateStr: "10.24.(토)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (소불고기전골)",
+            hotel: "귀가일 (김포공항 해산)",
+            items: [
+              { time: "07:00 - 10:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "조식 후 짐 정리 및 퇴실 준비", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:30 - 11:30", region: "제주권", transport: "전용차량", title: "◆천지연폭포", detail: "서귀포 천지연 계곡 및 폭포 관람", category: "spot", rainyKey: "천지연폭포" },
+              { time: "12:00 - 13:00", region: "제주권", transport: "전용차량", title: "◆제주제트 [제트보트체험]", detail: "주상절리 해상 제트보트 탑승 체험", category: "spot", rainyKey: "제주제트" },
+              { time: "14:00 - 15:00", region: "제주권", transport: "전용차량", title: "중식 후 (제주늘봄_소불고기전골)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "15:10 - 17:00", region: "제주권", transport: "전용차량", title: "◆자연인_족욕체험&카페체험", detail: "여행 피로 회복 족욕 및 카페 휴식", category: "spot" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "제주공항으로 이동", detail: "탑승수속 준비", category: "flight" },
+              { time: "19:35 - 20:50", region: "제주→서울", transport: "전용항공", title: "제주공항 출발 – 김포공항 도착", detail: "대한항공 탑승", category: "flight" },
+              { time: "21:30 예정", region: "서울", transport: "개별해산", title: "김포공항 도착 및 개별해산", detail: "안전하게 귀가", category: "flight" }
+            ]
+          }
+        }
+      },
+
+      C: {
+        id: "C",
+        name: "C팀",
+        classes: [2, 4, 10],
+        classText: "2반, 4반, 10반",
+        students: 92,
+        teachers: 6,
+        total: 98,
+        region: "제주권",
+        period: "2026.10.22.(목) - 10.24.(토)",
+        hotel: "켄싱턴리조트 서귀포점",
+        meetingPlace: "김포공항 1층 앤젤리너스 앞 집결",
+        meetingTime: "05:00 집결",
+        flightOut: "대한항공 07:25 - 08:40 (김포 → 제주)",
+        flightBack: "대한항공 19:35 - 20:50 (제주 → 김포)",
+        dismissTime: "21:30 예정",
+        flightHeaderNote: "김포출발 : 대한항공 0705/0710/0720 | 제주출발 : 대한항공 1815/1940/1955",
+        days: {
+          1: {
+            dayTitle: "제1일",
+            dateStr: "10.22.(목)",
+            mealsSummary: "중: 현지식 (흑돼지주물럭+보말미역국) · 석: 현지식 (애슐리퀸즈 디너뷔페)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "05:00 집결", region: "서울", transport: "개별이동", title: "공항 집결 및 인원점검 후 탑승수속", detail: "김포공항 1층 앤젤리너스 앞 집결", category: "flight" },
+              { time: "07:25 - 08:40", region: "서울→제주", transport: "전용항공", title: "김포공항 출발 – 제주공항 도착 / 차량으로 이동", detail: "대한항공 탑승 및 제주 도착 후 전용차량 탑승", category: "flight" },
+              { time: "10:00 - 11:00", region: "제주권", transport: "전용차량", title: "◆산굼부리", detail: "천연기념물 분화구 및 가을 억새 관람", category: "spot", rainyKey: "산굼부리" },
+              { time: "11:10 - 12:10", region: "제주권", transport: "전용차량", title: "◆동화마을", detail: "제주 테마 정원 및 포토 스팟 관람", category: "spot", rainyKey: "동화마을" },
+              { time: "12:30 - 13:30", region: "제주권", transport: "전용차량", title: "중식 후 (산내들내_흑돼지주물럭+보말미역국)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "14:00 - 15:00", region: "제주권", transport: "전용차량", title: "◆레일바이크", detail: "제주 자연 풍경 레일바이크 체험", category: "spot" },
+              { time: "16:00 - 17:00", region: "제주권", transport: "전용차량", title: "◆천지연폭포", detail: "서귀포 천지연 계곡 및 폭포 관람", category: "spot", rainyKey: "천지연폭포" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "숙소 도착 및 안전교육 후 객실배정", detail: "켄싱턴리조트 서귀포점 체크인", category: "hotel" },
+              { time: "17:30 이후", region: "제주권", transport: "전용차량", title: "석식 후 (애슐리퀸즈_디너뷔페)", detail: "석식 제공 (현지식 디너뷔페)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          2: {
+            dayTitle: "제2일",
+            dateStr: "10.23.(금)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (흑돼지쌈밥정식) · 석: 현지식 (제주산삼겹살+샐러드바)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "07:00 - 09:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "켄싱턴리조트 서귀포점 조식", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "09:40 - 10:30", region: "제주권", transport: "전용차량", title: "◆올레12코스 [엉알해변-자구내포구]", detail: "수월봉 해안절벽 올레길 걷기", category: "spot", rainyKey: "올레12코스" },
+              { time: "11:00 - 12:00", region: "제주권", transport: "전용차량", title: "◆협재해수욕장", detail: "제주 서부 에메랄드빛 해변 탐방", category: "spot", rainyKey: "협재해수욕장" },
+              { time: "12:20 - 13:20", region: "제주권", transport: "전용차량", title: "중식 후 (전원일기_흑돼지쌈밥정식)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "13:30 - 15:00", region: "제주권", transport: "전용차량", title: "◆산양큰엉곶", detail: "곶자왈 숲길 및 포토존 산책", category: "spot", rainyKey: "산양큰엉곶" },
+              { time: "15:30 - 18:00", region: "제주권", transport: "전용차량", title: "◆윈드1947테마파크", detail: "서킷 카트 등 테마파크 체험", category: "spot" },
+              { time: "18:00 - 19:00", region: "제주권", transport: "전용차량", title: "석식 후 (무송_제주산삼겹살+샐러드바)", detail: "석식 제공 (현지식)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "19:30 - 21:30", region: "제주권", transport: "전용차량", title: "숙소도착 후 ◆레크레이션", detail: "팀별/전체 야간 레크리에이션 활동", category: "spot" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          3: {
+            dayTitle: "제3일",
+            dateStr: "10.24.(토)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (소불고기전골)",
+            hotel: "귀가일 (김포공항 해산)",
+            items: [
+              { time: "07:00 - 10:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "조식 후 짐 정리 및 퇴실 준비", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:20 - 11:20", region: "제주권", transport: "전용차량", title: "◆제주제트 [제트보트체험]", detail: "주상절리 해상 제트보트 탑승 체험", category: "spot", rainyKey: "제주제트" },
+              { time: "11:30 - 12:30", region: "제주권", transport: "전용차량", title: "◆런닝맨체험", detail: "실내 액티비티 미션 체험", category: "spot" },
+              { time: "13:30 - 14:30", region: "제주권", transport: "전용차량", title: "중식 후 (제주늘봄_소불고기전골)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "15:00 - 17:00", region: "제주권", transport: "전용차량", title: "◆자연인_족욕체험&카페체험", detail: "여행 피로 회복 족욕 및 카페 휴식", category: "spot" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "제주공항으로 이동", detail: "탑승수속 준비", category: "flight" },
+              { time: "19:35 - 20:50", region: "제주→서울", transport: "전용항공", title: "제주공항 출발 – 김포공항 도착", detail: "대한항공 탑승", category: "flight" },
+              { time: "21:30 예정", region: "서울", transport: "개별해산", title: "김포공항 도착 및 개별해산", detail: "안전하게 귀가", category: "flight" }
+            ]
+          }
+        }
+      },
+
+      D: {
+        id: "D",
+        name: "D팀",
+        classes: [6, 8],
+        classText: "6반, 8반",
+        students: 50,
+        teachers: 5,
+        total: 55,
+        region: "제주권",
+        period: "2026.10.22.(목) - 10.24.(토)",
+        hotel: "켄싱턴리조트 서귀포점",
+        meetingPlace: "김포공항 1층 앤젤리너스 앞 집결",
+        meetingTime: "05:00 집결",
+        flightOut: "대한항공 07:40 - 08:55 (김포 → 제주)",
+        flightBack: "대한항공 19:35 - 20:50 (제주 → 김포)",
+        dismissTime: "21:30 예정",
+        flightHeaderNote: "김포출발 : 대한항공 0705/0710/0720 | 제주출발 : 대한항공 1815/1940/1955",
+        days: {
+          1: {
+            dayTitle: "제1일",
+            dateStr: "10.22.(목)",
+            mealsSummary: "중: 현지식 (흑돼지주물럭+보말미역국) · 석: 현지식 (애슐리퀸즈 디너뷔페)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "05:00 집결", region: "서울", transport: "개별이동", title: "공항 집결 및 인원점검 후 탑승수속", detail: "김포공항 1층 앤젤리너스 앞 집결", category: "flight" },
+              { time: "07:40 - 08:55", region: "서울→제주", transport: "전용항공", title: "김포공항 출발 – 제주공항 도착 / 차량으로 이동", detail: "대한항공 탑승 및 제주 도착 후 전용차량 탑승", category: "flight" },
+              { time: "10:30 - 11:30", region: "제주권", transport: "전용차량", title: "◆동화마을", detail: "제주 테마 정원 및 포토 스팟 관람", category: "spot", rainyKey: "동화마을" },
+              { time: "11:40 - 12:30", region: "제주권", transport: "전용차량", title: "중식 후 (산내들내_흑돼지주물럭+보말미역국)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "12:50 - 13:50", region: "제주권", transport: "전용차량", title: "◆산굼부리", detail: "천연기념물 분화구 및 가을 억새 관람", category: "spot", rainyKey: "산굼부리" },
+              { time: "14:20 - 15:20", region: "제주권", transport: "전용차량", title: "◆레일바이크", detail: "제주 자연 풍경 레일바이크 체험", category: "spot" },
+              { time: "16:10 - 17:00", region: "제주권", transport: "전용차량", title: "◆천지연폭포", detail: "서귀포 천지연 계곡 및 폭포 관람", category: "spot", rainyKey: "천지연폭포" },
+              { time: "17:30 - 18:00", region: "제주권", transport: "전용차량", title: "숙소 도착 및 안전교육 후 객실배정", detail: "켄싱턴리조트 서귀포점 체크인", category: "hotel" },
+              { time: "18:00 이후", region: "제주권", transport: "전용차량", title: "석식 후 (애슐리퀸즈_디너뷔페)", detail: "석식 제공 (현지식 디너뷔페)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          2: {
+            dayTitle: "제2일",
+            dateStr: "10.23.(금)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (흑돼지쌈밥정식) · 석: 현지식 (제주산삼겹살+샐러드바)",
+            hotel: "켄싱턴리조트 서귀포점",
+            items: [
+              { time: "07:00 - 09:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "켄싱턴리조트 서귀포점 조식", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "09:30 - 11:00", region: "제주권", transport: "전용차량", title: "◆산양큰엉곶", detail: "곶자왈 숲길 및 포토존 산책", category: "spot", rainyKey: "산양큰엉곶" },
+              { time: "11:20 - 12:20", region: "제주권", transport: "전용차량", title: "◆협재해수욕장", detail: "제주 서부 에메랄드빛 해변 탐방", category: "spot", rainyKey: "협재해수욕장" },
+              { time: "12:40 - 13:40", region: "제주권", transport: "전용차량", title: "중식 후 (전원일기_흑돼지쌈밥정식)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "14:00 - 15:00", region: "제주권", transport: "전용차량", title: "◆올레12코스 [엉알해변-자구내포구]", detail: "수월봉 해안절벽 올레길 걷기", category: "spot", rainyKey: "올레12코스" },
+              { time: "15:30 - 18:00", region: "제주권", transport: "전용차량", title: "◆윈드1947테마파크", detail: "서킷 카트 등 테마파크 체험", category: "spot" },
+              { time: "18:00 - 19:00", region: "제주권", transport: "전용차량", title: "석식 후 (무송_제주산삼겹살+샐러드바)", detail: "석식 제공 (현지식)", category: "meal", mealBadge: "석: 현지식" },
+              { time: "19:30 - 21:30", region: "제주권", transport: "전용차량", title: "숙소도착 후 ◆레크레이션", detail: "팀별/전체 야간 레크리에이션 활동", category: "spot" },
+              { time: "22:00 이후", region: "제주권", transport: "숙소", title: "휴식 및 취침", detail: "숙소 : 켄싱턴리조트 서귀포점", category: "hotel" }
+            ]
+          },
+          3: {
+            dayTitle: "제3일",
+            dateStr: "10.24.(토)",
+            mealsSummary: "조: 숙소식 · 중: 현지식 (소불고기전골)",
+            hotel: "귀가일 (김포공항 해산)",
+            items: [
+              { time: "07:00 - 10:00", region: "제주권", transport: "전용차량", title: "기상 및 조식", detail: "조식 후 짐 정리 및 퇴실 준비", category: "meal", mealBadge: "조: 숙소식" },
+              { time: "10:20 - 11:20", region: "제주권", transport: "전용차량", title: "◆런닝맨체험", detail: "실내 액티비티 미션 체험", category: "spot" },
+              { time: "11:40 - 12:40", region: "제주권", transport: "전용차량", title: "◆제주제트 [제트보트체험]", detail: "주상절리 해상 제트보트 탑승 체험", category: "spot", rainyKey: "제주제트" },
+              { time: "13:40 - 14:40", region: "제주권", transport: "전용차량", title: "중식 후 (제주늘봄_소불고기전골)", detail: "중식 제공 (현지식)", category: "meal", mealBadge: "중: 현지식" },
+              { time: "15:00 - 17:00", region: "제주권", transport: "전용차량", title: "◆자연인_족욕체험&카페체험", detail: "여행 피로 회복 족욕 및 카페 휴식", category: "spot" },
+              { time: "17:00 - 17:30", region: "제주권", transport: "전용차량", title: "제주공항으로 이동", detail: "탑승수속 준비", category: "flight" },
+              { time: "19:35 - 20:50", region: "제주→서울", transport: "전용항공", title: "제주공항 출발 – 김포공항 도착", detail: "대한항공 탑승", category: "flight" },
+              { time: "21:30 예정", region: "서울", transport: "개별해산", title: "김포공항 도착 및 개별해산", detail: "안전하게 귀가", category: "flight" }
+            ]
+          }
+        }
+      }
+    };
+
+    // ==========================================
+    // 2. APPLICATION STATE & STORAGE
+    // ==========================================
+    const state = {
+      selectedTeam: "A",
+      selectedClass: null,
+      selectedDay: "1", // "1", "2", "3", "all"
+      rainyMode: false,
+      categoryFilter: "all", // "all", "spot", "meal", "flight"
+      searchQuery: "",
+      activeView: "timeline", // "timeline", "compare", "rainy", "info"
+      compareDay: "1", // "1", "2", "3"
+      checkedItems: {}
+    };
+
+    function loadSavedState() {
+      try {
+        const savedTeam = localStorage.getItem("jeju2026_team");
+        const savedClass = localStorage.getItem("jeju2026_class");
+        const savedChecked = localStorage.getItem("jeju2026_checked");
+        if (savedTeam && TEAMS_DATA[savedTeam]) state.selectedTeam = savedTeam;
+        if (savedClass) state.selectedClass = parseInt(savedClass, 10);
+        if (savedChecked) state.checkedItems = JSON.parse(savedChecked) || {};
+      } catch (e) {
+        // Ignore storage errors in sandboxed frames
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem("jeju2026_team", state.selectedTeam);
+        if (state.selectedClass) {
+          localStorage.setItem("jeju2026_class", String(state.selectedClass));
+        } else {
+          localStorage.removeItem("jeju2026_class");
+        }
+        localStorage.setItem("jeju2026_checked", JSON.stringify(state.checkedItems));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    // ==========================================
+    // 3. HELPER FUNCTIONS
+    // ==========================================
+    function getRainyReplacement(rainyKey) {
+      if (!rainyKey) return null;
+      return RAINY_ALTERNATIVES.find(r => r.matchKey === rainyKey) || null;
+    }
+
+    function getCategoryMeta(cat) {
+      switch (cat) {
+        case "spot":
+          return { icon: "📍", label: "관광·체험", badgeClass: "bg-teal-50 text-teal-700 border-teal-200", dotClass: "bg-teal-500 text-white" };
+        case "meal":
+          return { icon: "🍽️", label: "식사", badgeClass: "bg-amber-50 text-amber-800 border-amber-200", dotClass: "bg-amber-500 text-white" };
+        case "flight":
+          return { icon: "✈️", label: "항공·집결", badgeClass: "bg-sky-50 text-sky-700 border-sky-200", dotClass: "bg-sky-500 text-white" };
+        case "hotel":
+        default:
+          return { icon: "🏨", label: "숙소·휴식", badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200", dotClass: "bg-indigo-500 text-white" };
+      }
+    }
+
+    let toastTimeout = null;
+    function showToast(message, icon = "✅") {
+      const toast = document.getElementById("toastNotification");
+      document.getElementById("toastIcon").textContent = icon;
+      document.getElementById("toastMessage").textContent = message;
+      toast.classList.remove("opacity-0");
+      toast.classList.add("opacity-100");
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0");
+      }, 2400);
+    }
+
+    // ==========================================
+    // 4. RENDER FUNCTIONS
+    // ==========================================
+    function renderClassSelector() {
+      const container = document.getElementById("classButtonsContainer");
+      const label = document.getElementById("selectedClassLabel");
+      const team = TEAMS_DATA[state.selectedTeam];
+
+      if (state.selectedClass) {
+        label.textContent = `${state.selectedClass}반 선택됨 → ${state.selectedTeam}팀`;
+      } else {
+        label.textContent = `${team.classes.join("·")}반 → ${team.name}`;
+      }
+
+      let html = "";
+      for (let c = 1; c <= 10; c++) {
+        const mappedTeam = CLASS_TO_TEAM[c];
+        const isCurrentTeam = mappedTeam === state.selectedTeam;
+        const isExactClass = state.selectedClass === c;
+
+        let btnStyle = "bg-white/10 text-white/85 hover:bg-white/20 border-white/15";
+        if (isExactClass) {
+          btnStyle = "bg-amber-400 text-slate-950 font-extrabold border-amber-300 shadow-sm scale-[1.03]";
+        } else if (isCurrentTeam) {
+          btnStyle = "bg-white/90 text-teal-900 font-bold border-white";
+        }
+
+        html += `
+          <button type="button" data-class="${c}" class="class-chip py-1 px-1 rounded-lg text-xs border transition-all active:scale-95 ${btnStyle}">
+            ${c}반
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+
+      container.querySelectorAll(".class-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const c = parseInt(btn.getAttribute("data-class"), 10);
+          const targetTeam = CLASS_TO_TEAM[c];
+          state.selectedClass = c;
+          state.selectedTeam = targetTeam;
+          if (state.activeView !== "timeline") {
+            state.activeView = "timeline";
+          }
+          saveState();
+          renderAll();
+          showToast(`${c}반은 ${targetTeam}팀입니다!`, "🎒");
+        });
+      });
+    }
+
+    function renderTeamTabs() {
+      const container = document.getElementById("teamTabsContainer");
+      const teams = ["A", "B", "C", "D"];
+      let html = "";
+
+      teams.forEach(tId => {
+        const t = TEAMS_DATA[tId];
+        const active = state.selectedTeam === tId;
+        const btnClass = active
+          ? "bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/30 font-extrabold"
+          : "bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold";
+        const subClass = active ? "text-teal-100" : "text-slate-400";
+
+        html += `
+          <button type="button" data-team="${tId}" class="team-tab flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all active:scale-95 ${btnClass}">
+            <span class="text-xs sm:text-sm leading-tight">${t.name}</span>
+            <span class="text-[10px] leading-tight mt-0.5 ${subClass}">${t.classes.join("·")}반</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      container.querySelectorAll(".team-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const tId = btn.getAttribute("data-team");
+          state.selectedTeam = tId;
+          if (state.selectedClass && CLASS_TO_TEAM[state.selectedClass] !== tId) {
+            state.selectedClass = null;
+          }
+          saveState();
+          renderAll();
+        });
+      });
+    }
+
+    function renderSubControls() {
+      const dayContainer = document.getElementById("dayTabsContainer");
+      const days = [
+        { id: "1", label: "제1일 (목)" },
+        { id: "2", label: "제2일 (금)" },
+        { id: "3", label: "제3일 (토)" },
+        { id: "all", label: "전체일정" }
+      ];
+
+      dayContainer.innerHTML = days.map(d => {
+        const active = state.selectedDay === d.id;
+        return `
+          <button type="button" data-day="${d.id}" class="day-tab shrink-0 px-3 py-1.5 rounded-full text-xs transition-all ${
+            active
+              ? "bg-slate-900 text-white font-bold shadow-xs"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium"
+          }">
+            ${d.label}
+          </button>
+        `;
+      }).join("");
+
+      dayContainer.querySelectorAll(".day-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.selectedDay = btn.getAttribute("data-day");
+          renderSubControls();
+          renderTimeline();
+        });
+      });
+
+      // Rainy toggle button state
+      const rainyBtn = document.getElementById("btnRainyToggle");
+      const rainyIcon = document.getElementById("rainyToggleIcon");
+      const rainyText = document.getElementById("rainyToggleText");
+      const noticeBanner = document.getElementById("rainyNoticeBanner");
+
+      if (state.rainyMode) {
+        rainyBtn.className = "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 bg-blue-600 text-white border-blue-600 shadow-sm";
+        rainyIcon.textContent = "☔";
+        rainyText.textContent = "우천시 일정 ON";
+        noticeBanner.classList.remove("hidden");
+      } else {
+        rainyBtn.className = "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+        rainyIcon.textContent = "☀️";
+        rainyText.textContent = "우천시 보기";
+        noticeBanner.classList.add("hidden");
+      }
+    }
+
+    function renderTeamSummaryCard() {
+      const team = TEAMS_DATA[state.selectedTeam];
+      const card = document.getElementById("teamSummaryCard");
+
+      card.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-teal-600 text-white font-extrabold text-sm">
+              ${team.id}
+            </span>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h2 class="text-sm sm:text-base font-extrabold text-slate-900">${team.name} 일정표 (${team.classText})</h2>
+                <span class="px-2 py-0.5 text-[11px] font-bold rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                  총 ${team.total}명
+                </span>
+              </div>
+              <p class="text-xs text-slate-500">학생 ${team.students}명 · 교사 ${team.teachers}명 | 숙소: ${team.hotel}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
+              ⏰ 1일차 ${team.meetingTime}
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2.5 text-xs">
+          <div class="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
+            <span class="text-base">🛫</span>
+            <div class="min-w-0">
+              <div class="text-[11px] text-slate-400 font-medium">제1일 출발 (김포 1층 앤젤리너스 앞 집결)</div>
+              <div class="font-bold text-slate-800 truncate">${team.flightOut}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
+            <span class="text-base">🛬</span>
+            <div class="min-w-0">
+              <div class="text-[11px] text-slate-400 font-medium">제3일 도착 (${team.dismissTime} 개별해산)</div>
+              <div class="font-bold text-slate-800 truncate">${team.flightBack}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCategoryFilters() {
+      const container = document.getElementById("categoryFilterContainer");
+      const filters = [
+        { id: "all", label: "전체" },
+        { id: "spot", label: "📍 관광·체험" },
+        { id: "meal", label: "🍽️ 식사" },
+        { id: "flight", label: "✈️ 이동·숙소" }
+      ];
+
+      container.innerHTML = filters.map(f => {
+        const active = state.categoryFilter === f.id;
+        return `
+          <button type="button" data-cat="${f.id}" class="cat-filter-btn shrink-0 px-2.5 py-1 rounded-lg text-xs transition ${
+            active
+              ? "bg-teal-600 text-white font-bold"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium"
+          }">
+            ${f.label}
+          </button>
+        `;
+      }).join("");
+
+      container.querySelectorAll(".cat-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.categoryFilter = btn.getAttribute("data-cat");
+          renderCategoryFilters();
+          renderTimeline();
+        });
+      });
+    }
+
+    function renderTimeline() {
+      const team = TEAMS_DATA[state.selectedTeam];
+      const container = document.getElementById("timelineContainer");
+      const dayKeys = state.selectedDay === "all" ? ["1", "2", "3"] : [state.selectedDay];
+      const query = state.searchQuery.trim().toLowerCase();
+
+      let html = "";
+      let totalRendered = 0;
+
+      dayKeys.forEach(dKey => {
+        const dayObj = team.days[dKey];
+        const filteredItems = dayObj.items.filter((item, idx) => {
+          // Category filter
+          if (state.categoryFilter === "spot" && item.category !== "spot") return false;
+          if (state.categoryFilter === "meal" && item.category !== "meal") return false;
+          if (state.categoryFilter === "flight" && item.category !== "flight" && item.category !== "hotel") return false;
+
+          // Search filter
+          if (query) {
+            const rainyAlt = getRainyReplacement(item.rainyKey);
+            const haystack = [
+              item.time,
+              item.title,
+              item.detail,
+              item.region,
+              item.transport,
+              item.mealBadge || "",
+              rainyAlt ? rainyAlt.after : ""
+            ].join(" ").toLowerCase();
+            if (!haystack.includes(query)) return false;
+          }
+          return true;
+        });
+
+        if (filteredItems.length === 0) return;
+        totalRendered += filteredItems.length;
+
+        html += `
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <!-- Day Header -->
+            <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg bg-teal-500 text-slate-950 font-extrabold text-xs">
+                  ${dayObj.dayTitle}
+                </span>
+                <span class="text-sm font-bold">${dayObj.dateStr}</span>
+              </div>
+              <span class="text-[11px] text-slate-300 font-medium">${dayObj.mealsSummary}</span>
+            </div>
+
+            <!-- Timeline Items -->
+            <div class="p-3 sm:p-4 relative timeline-line space-y-3">
+              ${filteredItems.map((item, idx) => {
+                const meta = getCategoryMeta(item.category);
+                const rainyAlt = getRainyReplacement(item.rainyKey);
+                const checkId = `${team.id}_D${dKey}_${item.time}_${item.title}`;
+                const isChecked = !!state.checkedItems[checkId];
+
+                const showRainySwap = state.rainyMode && rainyAlt;
+                const displayTitle = showRainySwap
+                  ? `☔ [우천대체] ◆${rainyAlt.after}`
+                  : item.title;
+
+                const cardBorder = showRainySwap
+                  ? "border-blue-300 bg-blue-50/50"
+                  : isChecked
+                  ? "border-slate-200 bg-slate-50/70 opacity-75"
+                  : "border-slate-200/90 bg-white hover:border-teal-300";
+
+                return `
+                  <div class="relative pl-8 card-transition">
+                    <!-- Timeline Dot -->
+                    <div class="absolute left-1.5 top-3.5 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-xs z-10 ${
+                      showRainySwap ? "bg-blue-600 text-white" : meta.dotClass
+                    }">
+                      ${showRainySwap ? "☔" : meta.icon}
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="rounded-xl border p-3 transition ${cardBorder}">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-extrabold bg-slate-900 text-white">
+                            ${item.time}
+                          </span>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${meta.badgeClass}">
+                            ${item.transport} · ${item.region}
+                          </span>
+                          ${item.mealBadge ? `
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                              ${item.mealBadge}
+                            </span>
+                          ` : ""}
+                        </div>
+
+                        <!-- Check toggle button -->
+                        <button type="button" data-check-id="${checkId}" class="check-item-btn shrink-0 w-6 h-6 rounded-lg border flex items-center justify-center text-xs transition ${
+                          isChecked
+                            ? "bg-teal-600 border-teal-600 text-white font-bold"
+                            : "bg-white border-slate-300 text-transparent hover:border-teal-500"
+                        }" title="일정 완료 체크">
+                          ✓
+                        </button>
+                      </div>
+
+                      <div class="mt-2">
+                        <h3 class="text-sm sm:text-[15px] font-bold ${
+                          isChecked ? "line-through text-slate-400" : showRainySwap ? "text-blue-900" : "text-slate-900"
+                        }">
+                          ${displayTitle}
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">${showRainySwap ? rainyAlt.note : item.detail}</p>
+                      </div>
+
+                      ${rainyAlt ? `
+                        <div class="mt-2 pt-2 border-t border-dashed ${showRainySwap ? "border-blue-200" : "border-slate-200"} flex items-center justify-between gap-2 text-[11px]">
+                          ${showRainySwap ? `
+                            <span class="text-slate-600">☀️ 기본 일정: <strong>${rainyAlt.before}</strong></span>
+                            <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">우천 대체 적용됨</span>
+                          ` : `
+                            <span class="text-blue-700 flex items-center gap-1">
+                              <span>☔ 우천시 대체:</span>
+                              <strong>${rainyAlt.after}</strong>
+                            </span>
+                          `}
+                        </div>
+                      ` : ""}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+
+            <!-- Day Footer Hotel Bar -->
+            <div class="bg-slate-50 px-4 py-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+              <span>🏨 <strong>숙소</strong>: ${dayObj.hotel}</span>
+              <span>총 ${filteredItems.length}개 일정</span>
+            </div>
+          </div>
+        `;
+      });
+
+      if (totalRendered === 0) {
+        html = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-slate-200">
+            <div class="text-3xl mb-2">🔍</div>
+            <p class="text-sm font-bold text-slate-800">조건에 맞는 일정이 없습니다.</p>
+            <p class="text-xs text-slate-500 mt-1">검색어나 카테고리 필터를 초기화해 보세요.</p>
+            <button id="btnResetFilters" type="button" class="mt-3 px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700">
+              필터 전체 초기화
+            </button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      // Attach check listeners
+      container.querySelectorAll(".check-item-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-check-id");
+          state.checkedItems[id] = !state.checkedItems[id];
+          saveState();
+          renderTimeline();
+        });
+      });
+
+      const resetBtn = document.getElementById("btnResetFilters");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          state.categoryFilter = "all";
+          state.searchQuery = "";
+          document.getElementById("searchInput").value = "";
+          document.getElementById("btnClearSearch").classList.add("hidden");
+          renderCategoryFilters();
+          renderTimeline();
+        });
+      }
+    }
+
+    function renderCompareView() {
+      const daySelector = document.getElementById("compareDaySelector");
+      const content = document.getElementById("compareContentContainer");
+
+      const days = [
+        { id: "1", label: "제1일 (10/22)" },
+        { id: "2", label: "제2일 (10/23)" },
+        { id: "3", label: "제3일 (10/24)" }
+      ];
+
+      daySelector.innerHTML = days.map(d => {
+        const active = state.compareDay === d.id;
+        return `
+          <button type="button" data-cday="${d.id}" class="compare-day-btn px-2.5 py-1 rounded-md text-xs transition ${
+            active ? "bg-white text-slate-900 font-bold shadow-xs" : "text-slate-600 hover:text-slate-900 font-medium"
+          }">
+            ${d.label}
+          </button>
+        `;
+      }).join("");
+
+      daySelector.querySelectorAll(".compare-day-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.compareDay = btn.getAttribute("data-cday");
+          renderCompareView();
+        });
+      });
+
+      const teams = ["A", "B", "C", "D"];
+      content.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          ${teams.map(tId => {
+            const t = TEAMS_DATA[tId];
+            const dObj = t.days[state.compareDay];
+            const isSelected = state.selectedTeam === tId;
+
+            return `
+              <div class="rounded-xl border p-3.5 ${isSelected ? "border-teal-500 bg-teal-50/30 ring-1 ring-teal-500/30" : "border-slate-200 bg-slate-50/50"}">
+                <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/80">
+                  <div>
+                    <span class="font-extrabold text-sm text-slate-900">${t.name}</span>
+                    <span class="text-xs text-slate-500 ml-1">(${t.classText})</span>
+                  </div>
+                  <button type="button" data-jump-team="${tId}" class="jump-team-btn text-[11px] font-bold px-2 py-0.5 rounded bg-teal-600 text-white hover:bg-teal-700">
+                    상세보기 →
+                  </button>
+                </div>
+                <ul class="space-y-1.5 text-xs">
+                  ${dObj.items.map(it => {
+                    const rainyAlt = getRainyReplacement(it.rainyKey);
+                    const titleText = state.rainyMode && rainyAlt ? `☔ ◆${rainyAlt.after}` : it.title;
+                    return `
+                      <li class="flex items-start gap-2">
+                        <span class="shrink-0 w-20 font-mono text-[11px] font-bold text-slate-500">${it.time}</span>
+                        <span class="font-medium ${it.category === 'spot' ? 'text-slate-900 font-bold' : it.category === 'meal' ? 'text-amber-800' : 'text-slate-600'}">${titleText}</span>
+                      </li>
+                    `;
+                  }).join("")}
+                </ul>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      content.querySelectorAll(".jump-team-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.selectedTeam = btn.getAttribute("data-jump-team");
+          state.selectedDay = state.compareDay;
+          state.activeView = "timeline";
+          saveState();
+          renderAll();
+        });
+      });
+    }
+
+    function renderRainyView() {
+      const container = document.getElementById("rainyCardsContainer");
+      container.innerHTML = RAINY_ALTERNATIVES.map(item => {
+        return `
+          <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-start sm:items-center gap-2.5">
+              <span class="w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                ${item.no}
+              </span>
+              <div>
+                <div class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm">
+                  <span class="text-slate-600 line-through">${item.before}</span>
+                  <span class="text-slate-400 font-bold">→</span>
+                  <span class="font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                    ☔ ${item.after}
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">${item.note}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderInfoView() {
+      const container = document.getElementById("mealSummaryContainer");
+      const mealDays = [
+        {
+          day: "제1일 (10/22 목)",
+          breakfast: "개별 (김포공항 집결 및 탑승)",
+          lunch: "A·B팀: 전원일기 (흑돼지쌈밥정식) / C·D팀: 산내들내 (흑돼지주물럭+보말미역국)",
+          dinner: "전 팀 공통: 애슐리퀸즈 (디너뷔페)"
+        },
+        {
+          day: "제2일 (10/23 금)",
+          breakfast: "전 팀 공통: 숙소식 (켄싱턴리조트 서귀포점)",
+          lunch: "A·B팀: 산내들내 (흑돼지주물럭+보말미역국) / C·D팀: 전원일기 (흑돼지쌈밥정식)",
+          dinner: "전 팀 공통: 무송 (제주산삼겹살+샐러드바)"
+        },
+        {
+          day: "제3일 (10/24 토)",
+          breakfast: "전 팀 공통: 숙소식 (켄싱턴리조트 서귀포점)",
+          lunch: "전 팀 공통: 제주늘봄 (소불고기전골)",
+          dinner: "김포공항 도착 후 개별해산"
+        }
+      ];
+
+      container.innerHTML = mealDays.map(m => `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-1.5">
+          <div class="font-extrabold text-slate-900 text-sm border-b border-slate-200 pb-1">${m.day}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            <div><span class="font-bold text-teal-700">조식:</span> <span class="text-slate-700">${m.breakfast}</span></div>
+            <div><span class="font-bold text-amber-700">중식:</span> <span class="text-slate-700">${m.lunch}</span></div>
+            <div><span class="font-bold text-indigo-700">석식:</span> <span class="text-slate-700">${m.dinner}</span></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderActiveView() {
+      const views = {
+        timeline: document.getElementById("viewTimeline"),
+        compare: document.getElementById("viewCompare"),
+        rainy: document.getElementById("viewRainy"),
+        info: document.getElementById("viewInfo")
+      };
+
+      const subControls = document.getElementById("timelineSubControls");
+      if (state.activeView === "timeline") {
+        subControls.classList.remove("hidden");
+      } else {
+        subControls.classList.add("hidden");
+      }
+
+      Object.keys(views).forEach(k => {
+        if (k === state.activeView) {
+          views[k].classList.remove("hidden");
+        } else {
+          views[k].classList.add("hidden");
+        }
+      });
+
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        const nav = btn.getAttribute("data-nav");
+        if (nav === state.activeView) {
+          btn.className = "nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-teal-600 bg-teal-50/80 font-extrabold text-[11px] transition";
+        } else {
+          btn.className = "nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 hover:text-slate-800 font-medium text-[11px] transition";
+        }
+      });
+    }
+
+    function copyCurrentTeamSchedule() {
+      const team = TEAMS_DATA[state.selectedTeam];
+      let lines = [
+        `[${team.name} 제주권 여행 일정표 (${team.classText})]`,
+        `• 기간: ${team.period}`,
+        `• 인원: 학생 ${team.students}명, 교사 ${team.teachers}명`,
+        `• 집결: 제1일 ${team.meetingTime} (${team.meetingPlace})`,
+        `• 숙소: ${team.hotel}`,
+        ""
+      ];
+
+      ["1", "2", "3"].forEach(dKey => {
+        const d = team.days[dKey];
+        lines.push(`■ ${d.dayTitle} (${d.dateStr})`);
+        d.items.forEach(it => {
+          lines.push(`  - ${it.time} : ${it.title}`);
+        });
+        lines.push("");
+      });
+
+      const text = lines.join("\n");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`${team.name} 전체 일정이 클립보드에 복사되었습니다!`);
+        }).catch(() => {
+          fallbackCopy(text, team.name);
+        });
+      } else {
+        fallbackCopy(text, team.name);
+      }
+    }
+
+    function fallbackCopy(text, teamName) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast(`${teamName} 전체 일정이 클립보드에 복사되었습니다!`);
+      } catch (e) {
+        showToast("복사에 실패했습니다.", "⚠️");
+      }
+      document.body.removeChild(ta);
+    }
+
+    function renderAll() {
+      renderClassSelector();
+      renderTeamTabs();
+      renderSubControls();
+      renderTeamSummaryCard();
+      renderCategoryFilters();
+      renderTimeline();
+      renderCompareView();
+      renderRainyView();
+      renderInfoView();
+      renderActiveView();
+    }
+
+    // ==========================================
+    // 5. INITIALIZE & EVENT LISTENERS
+    // ==========================================
+    window.addEventListener("DOMContentLoaded", () => {
+      loadSavedState();
+      renderAll();
+
+      // Rainy mode toggle
+      document.getElementById("btnRainyToggle").addEventListener("click", () => {
+        state.rainyMode = !state.rainyMode;
+        renderAll();
+        showToast(
+          state.rainyMode ? "☔ 우천시 대체 일정으로 전환되었습니다." : "☀️ 기본(맑음) 일정으로 전환되었습니다.",
+          state.rainyMode ? "☔" : "☀️"
+        );
+      });
+
+      document.getElementById("btnTurnOffRainy").addEventListener("click", () => {
+        state.rainyMode = false;
+        renderAll();
+      });
+
+      // Search input
+      const searchInput = document.getElementById("searchInput");
+      const clearBtn = document.getElementById("btnClearSearch");
+
+      searchInput.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value;
+        if (state.searchQuery.trim().length > 0) {
+          clearBtn.classList.remove("hidden");
+        } else {
+          clearBtn.classList.add("hidden");
+        }
+        renderTimeline();
+      });
+
+      clearBtn.addEventListener("click", () => {
+        state.searchQuery = "";
+        searchInput.value = "";
+        clearBtn.classList.add("hidden");
+        renderTimeline();
+      });
+
+      // Bottom Nav buttons
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.activeView = btn.getAttribute("data-nav");
+          renderActiveView();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      // Copy schedule button
+      document.getElementById("btnShareSchedule").addEventListener("click", copyCurrentTeamSchedule);
+    });
+  </script>
+</body>
+</html>
