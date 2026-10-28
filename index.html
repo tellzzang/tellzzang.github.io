@@ -3,114 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>탤짱(tellzzang) 스마트 웹앱 포털</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>탤짱닷컴 (tellzzang.com)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #05050f;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 배경 오로라 그라데이션 애니메이션 */
+    .aurora {
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background:
+        radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.25), transparent 40%),
+        radial-gradient(circle at 70% 60%, rgba(236, 72, 153, 0.22), transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15), transparent 45%);
+      animation: rotateAurora 18s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes rotateAurora {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.15); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* 중앙 글래스모피즘 카드 */
+    .card {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 3.5rem 3rem;
+      border-radius: 28px;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.2);
+      max-width: 480px;
+      width: 90%;
+      animation: floatCard 5s ease-in-out infinite, fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 50%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 2.2rem;
+    }
+
+    /* 빛나는 네온 버튼 */
+    .btn-portal {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 1rem 2.4rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+      background-size: 200% 200%;
+      box-shadow: 0 10px 30px -5px rgba(139, 92, 246, 0.6);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: gradientShift 4s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .btn-portal:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 20px 40px -5px rgba(236, 72, 153, 0.75);
+    }
+
+    .btn-portal svg {
+      width: 20px; height: 20px;
+      transition: transform 0.3s ease;
+    }
+    .btn-portal:hover svg {
+      transform: translateX(5px);
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
-  <main class="max-w-4xl mx-auto w-full px-6 py-12">
-    <header class="text-center mb-12">
-      <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold tracking-wide mb-3 border border-indigo-500/30">
-        GITHUB PAGES WEB APP PORTAL
-      </span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
-        🚀 탤짱(tellzzang) 웹앱 센터
-      </h1>
-      <p class="mt-3 text-slate-400 text-sm sm:text-base">
-        다운로드 없이 링크 클릭 한 번으로 스마트폰·PC 어디서나 바로 실행되는 웹앱 모음입니다.
-      </p>
-    </header>
+<body>
+  <div class="aurora"></div>
+  <canvas id="stars"></canvas>
 
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- 카드 1: 제주권 모바일 일정표 -->
-      <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
-        <div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl mb-4">
-            🏝️
-          </div>
-          <span class="text-xs font-semibold text-emerald-400">모바일 일정표</span>
-          <h2 class="text-lg font-bold text-white mt-1 mb-2">2026 제주권 모바일 일정표</h2>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            A·B·C·D팀별 세부 일정 및 동선을 모바일과 PC에서 한눈에 확인할 수 있는 인터랙티브 일정표 웹앱입니다.
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-800/80 flex gap-2">
-          <a href="./jeju.html" class="flex-1 text-center py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition">
-            바로 열기 →
-          </a>
-          <button onclick="copyLink('jeju.html')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition" title="링크 복사">
-            🔗 복사
-          </button>
-        </div>
-      </div>
-
-      <!-- 카드 2: 마음 다스림 100선 -->
-      <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
-        <div>
-          <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl mb-4">
-            🧘
-          </div>
-          <span class="text-xs font-semibold text-amber-400">힐링 &amp; 명언 웹앱</span>
-          <h2 class="text-lg font-bold text-white mt-1 mb-2">마음 다스림 100선 (네컷만화 완결판)</h2>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            100개의 에세이와 실제 네컷만화가 탑재된 마음 다스림 모바일/PC 겸용 웹앱입니다.
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-800/80 flex gap-2">
-          <a href="./mind100.html" class="flex-1 text-center py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm transition">
-            바로 열기 →
-          </a>
-          <button onclick="copyLink('mind100.html')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition" title="링크 복사">
-            🔗 복사
-          </button>
-        </div>
-      </div>
-
-      <!-- 카드 3: 탤짱 위키백과 -->
-      <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/60 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
-        <div>
-          <div class="w-12 h-12 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-2xl mb-4">
-            📚
-          </div>
-          <span class="text-xs font-semibold text-indigo-400">지식 아카이브</span>
-          <h2 class="text-lg font-bold text-white mt-1 mb-2">탤짱 위키백과</h2>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            주요 정보와 기록을 체계적으로 정리하고 검색할 수 있는 나만의 위키백과 웹앱입니다.
-          </p>
-        </div>
-        <div class="mt-6 pt-4 border-t border-slate-800/80 flex gap-2">
-          <a href="./wiki.html" class="flex-1 text-center py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition">
-            바로 열기 →
-          </a>
-          <button onclick="copyLink('wiki.html')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition" title="링크 복사">
-            🔗 복사
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 hidden px-4 py-2.5 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow-lg">
-      링크가 클립보드에 복사되었습니다!
-    </div>
-  </main>
-
-  <footer class="text-center py-6 text-xs text-slate-600 border-t border-slate-900">
-    Powered by GitHub Pages · <a href="https://tellzzang.github.io" class="hover:text-slate-400">tellzzang.github.io</a>
-  </footer>
+  <div class="card">
+    <span class="badge">WELCOME TO TELLZZANG</span>
+    <h1>탤짱닷컴</h1>
+    <p>공식 홈페이지 및 블로그로 이동하시려면<br/>아래 버튼을 클릭해 주세요.</p>
+    <a href="https://tellzzang.com/331" class="btn-portal">
+      <span>탤짱닷컴 바로가기</span>
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+    </a>
+  </div>
 
   <script>
-    function copyLink(file) {
-      const url = new URL(file, window.location.href).href;
-      navigator.clipboard.writeText(url).then(() => {
-        const toast = document.getElementById('toast');
-        toast.textContent = '✅ 링크 복사 완료: ' + url;
-        toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 2500);
+    // 인터랙티브 별자리 파티클 애니메이션
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 2 + 0.5,
+        dx: (Math.random() - 0.5) * 0.6,
+        dy: (Math.random() - 0.5) * 0.6,
+        alpha: Math.random() * 0.8 + 0.2
       });
     }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > w) p.dx *= -1;
+        if (p.y < 0 || p.y > h) p.dy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(199, 210, 254, ${p.alpha})`;
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 110) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(129, 140, 248, ${0.18 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
   </script>
 </body>
 </html>
