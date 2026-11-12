@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tellzzang Notion Live Widget</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: transparent;
+    color: #37352f;
+    padding: 8px;
+    user-select: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #ffffffcf; }
+    .card { background: #202020 !important; border-color: #2f2f2f !important; }
+    .sub-text { color: #9b9b9b !important; }
+    .cal-day.empty { color: transparent !important; }
+    .cal-header span { color: #ffffffcf !important; }
+    .quote-box { background: #262626 !important; }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.3fr;
+    gap: 14px;
+    max-width: 100%;
+  }
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #e9e9e7;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #787774;
+    margin-bottom: 8px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .time-display {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 4px 0 8px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .ampm {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2563eb;
+    margin-left: 4px;
+  }
+  .date-display {
+    font-size: 14px;
+    font-weight: 500;
+    color: #37352f;
+  }
+  .sub-text {
+    font-size: 12px;
+    color: #787774;
+    margin-top: 6px;
+  }
+  /* Calendar */
+  .cal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .cal-title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cal-nav button {
+    background: none;
+    border: 1px solid #e9e9e7;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 7px;
+    color: inherit;
+  }
+  .cal-nav button:hover { background: #f1f1ef; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    gap: 2px;
+    font-size: 11px;
+  }
+  .cal-dow {
+    font-weight: 600;
+    color: #9b9a97;
+    padding-bottom: 4px;
+  }
+  .cal-dow.sun { color: #e03e3e; }
+  .cal-dow.sat { color: #2563eb; }
+  .cal-day {
+    padding: 4px 0;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-day.today {
+    background: #2563eb;
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+  .cal-day.sun { color: #e03e3e; }
+  .cal-day.sat { color: #2563eb; }
+  /* Quote */
+  .quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .refresh-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #9b9a97;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  .refresh-btn:hover { background: #f1f1ef; color: #37352f; }
+  .quote-box {
+    background: #f8f8f7;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    font-weight: 500;
+    word-break: keep-all;
+  }
+  .quote-author {
+    font-size: 11.5px;
+    color: #787774;
+    text-align: right;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="grid">
+  <!-- 1. Live Clock -->
+  <div class="card">
+    <div>
+      <div class="badge"><span class="dot"></span> LIVE KST CLOCK</div>
+      <div class="time-display"><span id="clock-time">--:--:--</span><span class="ampm" id="clock-ampm">--</span></div>
+      <div class="date-display" id="clock-date">----년 --월 --일 -요일</div>
+    </div>
+    <div class="sub-text" id="week-info">연중 제 --주차 · 실시간 자동 갱신</div>
+  </div>
+
+  <!-- 2. Dynamic Mini Calendar -->
+  <div class="card">
+    <div class="cal-top">
+      <span class="cal-title" id="cal-month-label">----년 --월</span>
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">◀</button>
+        <button onclick="resetToday()">오늘</button>
+        <button onclick="changeMonth(1)">▶</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- 3. Daily Rotating Quote -->
+  <div class="card">
+    <div class="quote-header">
+      <div class="badge">✨ TODAY'S INSPIRATION · 오늘의 문장</div>
+      <button class="refresh-btn" onclick="nextQuote()" title="다른 문장 보기">↻</button>
+    </div>
+    <div class="quote-box" id="quote-text"></div>
+    <div class="quote-author" id="quote-author"></div>
+  </div>
+</div>
+
+<script>
+  const quotes = [
+    { text: "배움은 일상의 물음에서 시작되고, 교육은 아이들과 함께 호흡하는 모든 순간에 깃든다.", author: "— 안태일의 교단 잡담록" },
+    { text: "교실은 완벽한 정답을 외우는 곳이 아니라, 어제보다 조금 더 나은 질문을 던지는 연습장이다.", author: "— 안태일의 학교시집" },
+    { text: "경제학이 차가운 숫자의 학문이라면, 교실 속 경제는 아이들의 삶을 따뜻하게 지키는 상식의 언어다.", author: "— 상식 수준의 일반사회" },
+    { text: "바쁜 학사 일정 속에서도 여백 한 줄을 남겨두는 것, 그것이 교사가 지치지 않고 멀리 가는 비결이다.", author: "— 안태일의 교단 잡담록" },
+    { text: "아이들의 눈높이로 세상을 바라볼 때, 가장 평범한 수업도 가장 특별한 사건이 된다.", author: "— 안태일의 학교시집" },
+    { text: "기록되지 않은 일상은 흩어지지만, 정돈된 기록은 내일의 나를 이끄는 가장 든든한 나침반이 된다.", author: "— Tellzzang Life OS" },
+    { text: "좋은 질문 하나가 백 마디 훈화보다 깊게 아이들의 마음을 움직인다.", author: "— 안태일의 교단 잡담록" }
+  ];
+
+  const daysKo = ['일', '월', '화', '수', '목', '금', '토'];
+
+  function updateClock() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    document.getElementById('clock-time').textContent = `${String(h).padStart(2, '0')}:${m}:${s}`;
+    document.getElementById('clock-ampm').textContent = ampm;
+
+    const y = now.getFullYear();
+    const mo = now.getMonth() + 1;
+    const d = now.getDate();
+    const dow = daysKo[now.getDay()];
+    document.getElementById('clock-date').textContent = `${y}년 ${mo}월 ${d}일 (${dow}요일)`;
+
+    const startOfYear = new Date(y, 0, 1);
+    const pastDays = (now - startOfYear) / 86400000;
+    const weekNum = Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
+    document.getElementById('week-info').textContent = `${y}년 제 ${weekNum}주차 · 실시간 KST 동기화`;
+  }
+
+  let viewYear = new Date().getFullYear();
+  let viewMonth = new Date().getMonth();
+
+  function renderCalendar() {
+    const now = new Date();
+    const todayY = now.getFullYear();
+    const todayM = now.getMonth();
+    const todayD = now.getDate();
+
+    document.getElementById('cal-month-label').textContent = `${viewYear}년 ${viewMonth + 1}월`;
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    daysKo.forEach((dow, idx) => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow' + (idx === 0 ? ' sun' : idx === 6 ? ' sat' : '');
+      el.textContent = dow;
+      grid.appendChild(el);
+    });
+
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const lastDate = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= lastDate; d++) {
+      const cell = document.createElement('div');
+      const dow = (firstDay + d - 1) % 7;
+      let cls = 'cal-day';
+      if (dow === 0) cls += ' sun';
+      if (dow === 6) cls += ' sat';
+      if (viewYear === todayY && viewMonth === todayM && d === todayD) {
+        cls += ' today';
+      }
+      cell.className = cls;
+      cell.textContent = d;
+      grid.appendChild(cell);
+    }
+  }
+
+  function changeMonth(delta) {
+    viewMonth += delta;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderCalendar();
+  }
+
+  function resetToday() {
+    const now = new Date();
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+    renderCalendar();
+  }
+
+  const nowForQuote = new Date();
+  const dayOfYear = Math.floor((nowForQuote - new Date(nowForQuote.getFullYear(), 0, 0)) / 86400000);
+  let quoteIdx = dayOfYear % quotes.length;
+
+  function renderQuote() {
+    const q = quotes[quoteIdx];
+    document.getElementById('quote-text').textContent = `"${q.text}"`;
+    document.getElementById('quote-author').textContent = q.author;
+  }
+
+  function nextQuote() {
+    quoteIdx = (quoteIdx + 1) % quotes.length;
+    renderQuote();
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+  renderCalendar();
+  renderQuote();
+</script>
+</body>
+</html>
